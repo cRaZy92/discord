@@ -1,6 +1,24 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+var mysql = require('mysql');
+
+var con = mysql.createConnection({
+    host: 'sql7.freemysqlhosting.net',
+    port: 3306,
+    user: 'sql7269449',
+    password: 'pdm9WDSyBw',
+    database: 'sql7269449',
+    connectionLimit: 15,
+    queueLimit: 30,
+    acquireTimeout: 1000000
+  });
+  
+  con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected to DB!");
+  });
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
   });
@@ -46,7 +64,7 @@ function processCommand(receivedMessage) {
         case "coin": coinCommand(arguments, receivedMessage);
             break;
 
-        case "steam": steamCommand(arguments, receivedMessage);
+        case "daily": dailyCommand(arguments, receivedMessage);
             break;
     
         default: receivedMessage.channel.send("I don't understand the command. Try `!help` or `!multiply`");
@@ -184,19 +202,29 @@ function coinCommand(arguments, receivedMessage) {
 }
 
 // ****************************
-//        STEAM command
+//        DAILY command
 // ****************************
-function steamCommand(arguments, receivedMessage) {
-    /*if (arguments.length != 2) {
-        receivedMessage.channel.send("Not valid number of parameters. Syntax :`.random [from] [to]`");
+function dailyCommand(arguments, receivedMessage) {
+    if (arguments.length != 0) {
+        receivedMessage.channel.send("Not valid number of parameters. Syntax :`.daily`");
         return
     }
-    */
-    steam = post("SteamUser", "GetPlayerSummaries", 1, "response");
+    var user = client.user.toString();
+    var userID = user.replace(/[<@!>]/g, '');
+    //con.connect();
 
-    receivedMessage.channel.send("hmmm: " + steam.toString());
+con.query("SELECT money FROM users WHERE user_id = '"+userID+"';", function(err, rows)
+{
+  if (err) throw err;
+  console.log("Rows: "+JSON.stringify(rows, null, 4));
+  if(rows == '')
+    console.log("Empty row");
+  console.log("Done user: "+userID);
+});
+
+//con.end();
+
+    //receivedMessage.channel.send("hmmm: " + rows.toString());
 }
-
-
 
 client.login("NTIwNjQ0NTgzODA2NDY4MDk2.Duw80A.XGSHFizckziBDbmyhqotoB6WfeA");
