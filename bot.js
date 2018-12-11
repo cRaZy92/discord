@@ -15,7 +15,10 @@ var con = mysql.createConnection({
   });
   
   con.connect(function(err) {
-    if (err) throw err;
+    if (err){
+        console.log("Error when connecting to database!");
+        throw err;
+    } 
     console.log("Connected to DB!");
   });
 
@@ -67,7 +70,7 @@ function processCommand(receivedMessage) {
         case "daily": dailyCommand(arguments, receivedMessage);
             break;
     
-        default: receivedMessage.channel.send("I don't understand the command. Try `!help` or `!multiply`");
+        default: receivedMessage.channel.send("I don't understand the command. Try `.help` or `.multiply`");
             break;
     }
 }
@@ -213,12 +216,39 @@ function dailyCommand(arguments, receivedMessage) {
     var userID = user.replace(/[<@!>]/g, '');
     //con.connect();
 
-con.query("SELECT money FROM users WHERE user_id = '"+userID+"';", function(err, rows)
-{
-  if (err) throw err;
-  console.log("Rows: "+JSON.stringify(rows, null, 4));
-  if(rows == '')
-    console.log("Empty row");
+con.query("SELECT money FROM users WHERE user_id = '"+userID+"';", function(err, rows) { //if user exist -> get his money / if doesnt -> insert to the DB
+    if (err){
+        console.log("Error when reading from database!");
+        throw err;
+    } 
+    console.log("Rows: "+JSON.stringify(rows, null, 4));  //console -> object variables
+  if(rows == ''){
+
+    con.query("INSERT INTO users (user_id, money) VALUES ("+userID+", 100);", function (err, insert_result) {
+    if (err){
+        console.log("Error when creating user profile in the database!");
+        throw err;
+    } 
+    console.log("Result: " + insert_result);
+  });
+
+  }else{
+    //adding money to user
+
+    user_money = rows.money;
+    user_money_new = user_money + 100;
+
+    con.query("UPDATE users SET money = '"+user_money_new+"', last_check = now() WHERE user_id = '"+userID+"';", function(err) {
+        if (err){
+            console.log("Error when writing money to the database!");
+            throw err;
+        }
+        console.log("User: " + userID+ " Old money: "+user_money+" New money: "+user_money_new);
+
+    });
+  }
+
+
   console.log("Done user: "+userID);
 });
 
