@@ -216,12 +216,26 @@ function dailyCommand(arguments, receivedMessage) {
     var userID = user.replace(/[<@!>]/g, '');
     //con.connect();
 
-con.query("SELECT money FROM users WHERE user_id = '"+userID+"';", function(err, rows) { //if user exist -> get his money / if doesnt -> insert to the DB
-    if (err){
-        console.log("Error when reading from database!");
-        throw err;
-    } 
-    console.log("Rows: "+JSON.stringify(rows, null, 4));  //console -> object variables
+    var json = {
+    "user": [{
+            "user_id": "123456789",
+            "money": 0},
+        {
+            "user_id": "123456789",
+            "money": 0}]
+};
+
+var users = json["user"];
+for(var i=0; i < users.length; ++i) {
+    var users_i = users[i];
+    if(users_i["user_id"] == '+userID+') {
+        user_money = users_i["user_id"];
+        user_money = user_money["money"];
+    break;
+    }
+    //if (user_money is empty then create new log for him in JSON file)
+}
+  console.log("Rows: "+JSON.stringify(rows, null, 4));  //console -> object variables
   if(rows == ''){
 
     con.query("INSERT INTO users (user_id, money) VALUES ("+userID+", 100);", function (err, insert_result) {
